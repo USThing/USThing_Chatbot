@@ -5,10 +5,13 @@ const courses_json = JSON.parse(fs.readFileSync('all_courses.json', 'utf8')).cou
 
 const getCourseReply = (parameters) => {
   var course_code = parameters.courses;
+  // console.log("the passed course code is " + course_code);
   var section_code = parameters.section;
+  // console.log("the passed section code is " + section_code);
   var reply = [];
 
   if (course_code === '' || course_code === undefined || course_code === null) {
+    reply[0] = 'No course code detected.'
     return reply;
   }
 
@@ -27,23 +30,25 @@ const getCourseReply = (parameters) => {
   for (var section of course_detail.sections) {
     if (section_code !== '' && section_code !== null && section_code !== undefined) {
       var section_code_fromjson = section.name.replace('0','');
-      if (section_code === 'Lecture') {
+      var section_code_refine = section_code.toUpperCase().replace('0', '');
+      console.log("the refined section code is " + section_code_refine);
+      if (section_code_refine.includes('LEC') || section_code_refine === 'L') {
         reply[0] = `Let me show you all lectures of ${course_code}.`
         if (section_code_fromjson.toUpperCase().includes('L')) {
           reply.push(getSectionReply(section))
         }
-      }else if (section_code === 'Tutorial') {
+    }else if (section_code_refine.includes('TUT') || section_code_refine === 'T') {
         reply[0] = `Let me show you all tutorials of ${course_code}.`
         if (section_code_fromjson.toUpperCase().includes('T')) {
           reply.push(getSectionReply(section))
         }
-      }else if (section_code === 'Lab') {
+    }else if (section_code_refine === 'LAB') {
         reply[0] = `Let me show you all labs of ${course_code}.`
         if (section_code_fromjson.toUpperCase().includes('LA')) {
           reply.push(getSectionReply(section))
         }
       }else {
-        if (section_code_fromjson.toUpperCase() === section_code.toUpperCase()) {
+        if (section_code_fromjson.toUpperCase() === section_code_refine) {
           reply[0] = `Let me show you ${course_code} ${section_code.toUpperCase()}.`;
           reply.push(getSectionReply(section));
           break;
