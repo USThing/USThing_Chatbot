@@ -42,7 +42,7 @@ const getCourseReply = (parameters) => {
         if (section_code_fromjson.toUpperCase().includes('T')) {
           reply.push(getSectionReply(section))
         }
-    }else if (section_code_refine === 'LAB') {
+    }else if (section_code_refine.includes('LAB')) {
         reply[0] = `Let me show you all labs of ${course_code}.`
         if (section_code_fromjson.toUpperCase().includes('LA')) {
           reply.push(getSectionReply(section))
