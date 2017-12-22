@@ -9,7 +9,7 @@ const textRequest = (text, sessionID) => {
   const request = app.textRequest(text, {
       sessionId: sessionID
   });
-
+  console.log("dialogflow used.");
   request.on('response', function(response) {
     if (!response.result.action.includes('class')) {
       telegram_bot.bot.sendMessage(sessionID, response.result.fulfillment.speech);

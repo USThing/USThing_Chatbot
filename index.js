@@ -8,8 +8,14 @@ const courses_json = JSON.parse(fs.readFileSync('all_courses.json', 'utf8')).cou
 
 const moment = require('moment');
 
-const handler = require('./src/apiai_handler');
+// const dialogflowHandler = require('./src/apiai_handler');
+
+const witHandler = require('./src/witai_handler');
+
+// telegram_bot.bot.on('message', (msg) => {
+//   dialogflowHandler.textRequest(msg.text, msg.chat.id);
+// });
 
 telegram_bot.bot.on('message', (msg) => {
-  handler.textRequest(msg.text, msg.chat.id);
+  witHandler.textRequest(msg.text, msg.chat.id);
 });
