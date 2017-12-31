@@ -10,9 +10,10 @@ src/
 ... action/             // put any chatbot actions here
 ... apiai_handler.js    // handle dialogflow request and respond
 ... witai_handler.js    // handle wit.ai request and respond
+... fbmessenger.js      // handle facebook messenger messages and postbacks
 ... telegram_bot.js     // handle telegram bot setting
 all_courses.json        // dummy courses json file
-index.js
+index.js                // expressjs webhook for facebook messenger
 ```
 
 ## Development
@@ -24,7 +25,7 @@ index.js
 
 ## Features
 - [x] Show Class schedule and quota
-- [ ] Integrate with Facebook Messenger
+- [x] Integrate with Facebook Messenger
 - [ ] Repeatly remind class scheudle and quota
 - [ ] Book facilities
 - [ ] Answer questions

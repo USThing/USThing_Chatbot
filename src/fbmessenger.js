@@ -30,17 +30,16 @@ const handleMessage = (sender_psid, received_message) => {
             parameters.section = data.entities.Section[0].value;
             // console.log("the resolved section code is " + parameters.section);
           }
-          console.log(action.reply(parameters));
-          action.reply(parameters).forEach(function(result) {
+          // console.log(action.reply(parameters));
+          for (let result of action.reply(parameters)){
             response = {
               "text": result
             }
             callSendAPI(sender_psid, response);
-            console.log(`the response is ${result}`);
-          });
+            // console.log(`the response is ${result}`);
+          }
         }
       }
-
     } else {
       // default logic
       response = {
@@ -59,7 +58,7 @@ const handleMessage = (sender_psid, received_message) => {
         "payload": {
           "template_type": "generic",
           "elements": [{
-            "title": "Is this the right picture?",
+            "title": "You sent a picture. Is this the right picture?",
             "subtitle": "Tap a button to answer.",
             "image_url": attachment_url,
             "buttons": [
@@ -101,6 +100,27 @@ const handlePostback = (sender_psid, received_postback) => {
   callSendAPI(sender_psid, response);
 }
 
+const verifyRequestSignature = (req, res, buf) => {
+  var signature = req.headers["x-hub-signature"];
+  if (!signature) {
+    // For testing, let's log an error. In production, you should throw an
+    // error.
+    console.error("Couldn't validate the signature.");
+  } else {
+    var elements = signature.split('=');
+    var method = elements[0];
+    var signatureHash = elements[1];
+
+    var expectedHash = crypto.createHmac('sha1', FB_APP_SECRET)
+                        .update(buf)
+                        .digest('hex');
+
+    if (signatureHash != expectedHash) {
+      throw new Error("Couldn't validate the request signature.");
+    }
+  }
+}
+
 // Sends response messages via the Send API
 function callSendAPI(sender_psid, response) {
   // Construct the message body
@@ -127,3 +147,4 @@ function callSendAPI(sender_psid, response) {
 
 module.exports.handleMessage = handleMessage;
 module.exports.handlePostback = handlePostback;
+module.exports.verifyRequestSignature = verifyRequestSignature;

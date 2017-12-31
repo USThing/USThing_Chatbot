@@ -21,7 +21,7 @@ const witHandler = require('./src/witai_handler');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-app.use(bodyParser.json());
+app.use(bodyParser.json({ verify: fbmessenger.verifyRequestSignature }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.get('/', (req, res) => res.send('welcome to the root'));
 
