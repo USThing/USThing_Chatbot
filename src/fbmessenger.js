@@ -6,7 +6,7 @@ const FB_PAGE_TOKEN = process.env.FB_PAGE_TOKEN;
 const FB_APP_SECRET = process.env.FB_APP_SECRET;
 
 // Handles messages events
-const handleMessage = (sender_psid, received_message) => {
+const handleMessage = async (sender_psid, received_message) => {
 
   let response;
 
@@ -35,7 +35,7 @@ const handleMessage = (sender_psid, received_message) => {
             response = {
               "text": result
             }
-            callSendAPI(sender_psid, response);
+            await callSendAPI(sender_psid, response);
             // console.log(`the response is ${result}`);
           }
         }
@@ -101,7 +101,7 @@ const handlePostback = (sender_psid, received_postback) => {
 }
 
 const verifyRequestSignature = (req, res, buf) => {
-  var signature = req.headers["x-hub-signature"];
+  var signature = req.headers["x-hub-signature"];;
   if (!signature) {
     // For testing, let's log an error. In production, you should throw an
     // error.
@@ -123,25 +123,29 @@ const verifyRequestSignature = (req, res, buf) => {
 
 // Sends response messages via the Send API
 function callSendAPI(sender_psid, response) {
-  // Construct the message body
-  let request_body = {
-    "recipient": {
-      "id": sender_psid
-    },
-    "message": response
-  }
-  // Send the HTTP request to the Messenger Platform
-  request({
-    "uri": "https://graph.facebook.com/v2.6/me/messages",
-    "qs": { "access_token": FB_PAGE_TOKEN },
-    "method": "POST",
-    "json": request_body
-  }, (err, res, body) => {
-    if (!err) {
-      console.log('message sent!')
-    } else {
-      console.error("Unable to send message:" + err);
+  return new Promise ((resolve, reject) => {
+    // Construct the message body
+    let request_body = {
+      "recipient": {
+        "id": sender_psid
+      },
+      "message": response
     }
+    // Send the HTTP request to the Messenger Platform
+    request({
+      "uri": "https://graph.facebook.com/v2.6/me/messages",
+      "qs": { "access_token": FB_PAGE_TOKEN },
+      "method": "POST",
+      "json": request_body
+    }, (err, res, body) => {
+      if (!err) {
+        console.log('message sent!');
+        resolve();
+      } else {
+        console.error("Unable to send message:" + err);
+        reject();
+      }
+    });
   });
 }
 
