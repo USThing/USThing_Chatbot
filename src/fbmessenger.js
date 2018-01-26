@@ -17,20 +17,19 @@ const handleMessage = async (sender_psid, received_message) => {
       for (let i = 0; i < data.entities.intent.length; i++) {
         if (data.entities.intent[i].value === "class_schedule") {
           const action = require('./action/show_course');
-          // response = {
-          //   "text": 'Please wait as we are collecting useful data'
-          // }
-          // callSendAPI(sender_psid, response)
+
           var parameters = {courses: null, section: null}
           if (data.entities.Courses) {
             parameters.courses = data.entities.Courses[0].value;
-            // console.log("the resolved course code is " + parameters.courses);
+
           }
           if (data.entities.Section) {
             parameters.section = data.entities.Section[0].value;
-            // console.log("the resolved section code is " + parameters.section);
           }
-          // console.log(action.reply(parameters));
+          response = {
+            "text": 'Please wait as we are collecting useful data'
+          }
+          await callSendAPI(sender_psid, response);
           for (let result of action.reply(parameters)){
             response = {
               "text": result
@@ -45,7 +44,6 @@ const handleMessage = async (sender_psid, received_message) => {
       response = {
         "text": 'Sorry I do not understand what you mean.'
       }
-
       // Sends the response message
       callSendAPI(sender_psid, response);
     }
