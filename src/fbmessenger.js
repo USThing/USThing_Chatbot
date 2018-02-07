@@ -27,7 +27,7 @@ const handleMessage = async (sender_psid, received_message) => {
             parameters.section = data.entities.Section[0].value;
           }
           response = {
-            "text": 'Please wait as we are collecting useful data'
+            "text": 'Please wait as we are collecting data'
           }
           await callSendAPI(sender_psid, response);
           for (let result of action.reply(parameters)){
@@ -37,6 +37,25 @@ const handleMessage = async (sender_psid, received_message) => {
             await callSendAPI(sender_psid, response);
             // console.log(`the response is ${result}`);
           }
+        } else {
+          const action = require('./action/' + data.entities.intent[i].value);
+          response = {
+            "text": 'Please wait as we are collecting data'
+          }
+          await callSendAPI(sender_psid, response);
+          reply = await action.reply(data.entities);
+          try {
+            for (let result of reply){
+              response = {
+                "text": result
+              }
+              await callSendAPI(sender_psid, response);
+              console.log(`the response is ${result}`);
+            }
+          } catch (e) {
+            console.error(e);
+          }
+
         }
       }
     } else {
