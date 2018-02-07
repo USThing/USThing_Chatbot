@@ -5,7 +5,6 @@ const telegram_bot = require('./src/telegram_bot');
 const fbmessenger = require('./src/fbmessenger');
 
 const fs = require('fs');
-const courses_json = JSON.parse(fs.readFileSync('all_courses.json', 'utf8')).courses;
 const express = require('express');
 const moment = require('moment');
 const bodyParser = require('body-parser');

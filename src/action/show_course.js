@@ -1,7 +1,7 @@
 const moment = require('moment');
 
 const fs = require('fs');
-const courses_json = JSON.parse(fs.readFileSync('all_courses.json', 'utf8')).courses;
+const courses_json = JSON.parse(fs.readFileSync('courses.json', 'utf8')).courses;
 
 const getCourseReply = (parameters) => {
   var course_code = parameters.courses;
