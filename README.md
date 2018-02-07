@@ -26,6 +26,7 @@ index.js                // expressjs webhook for facebook messenger
 ## Features
 - [x] Show Class schedule and quota
 - [x] Integrate with Facebook Messenger
+- [x] Lift Advisor
 - [ ] Repeatly remind class scheudle and quota
 - [ ] Book facilities
 - [ ] Answer questions
