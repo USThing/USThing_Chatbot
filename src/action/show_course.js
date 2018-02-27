@@ -1,7 +1,7 @@
 const moment = require('moment');
 
 const fs = require('fs');
-const courses_json = JSON.parse(fs.readFileSync('all_courses.json', 'utf8')).courses;
+const courses_json = JSON.parse(fs.readFileSync('courses.json', 'utf8')).courses;
 
 const getCourseReply = (parameters) => {
   var course_code = parameters.courses;
@@ -37,12 +37,12 @@ const getCourseReply = (parameters) => {
         if (section_code_fromjson.toUpperCase().includes('L')) {
           reply.push(getSectionReply(section))
         }
-    }else if (section_code_refine.includes('TUT') || section_code_refine === 'T') {
+      }else if (section_code_refine.includes('TUT') || section_code_refine === 'T') {
         reply[0] = `Let me show you all tutorials of ${course_code}.`
         if (section_code_fromjson.toUpperCase().includes('T')) {
           reply.push(getSectionReply(section))
         }
-    }else if (section_code_refine.includes('LAB')) {
+      }else if (section_code_refine.includes('LAB')) {
         reply[0] = `Let me show you all labs of ${course_code}.`
         if (section_code_fromjson.toUpperCase().includes('LA')) {
           reply.push(getSectionReply(section))
@@ -56,7 +56,7 @@ const getCourseReply = (parameters) => {
           reply[0] = `${section_code} is not a valid section number.`;
         }
       }
-    }else {
+    } else {
       reply.push(getSectionReply(section));
     }
   }
