@@ -1,20 +1,20 @@
 // copied and modified from Dipsy Wong(dipsywong98) Repo: USThing-FindRoom/node/index.js
-const request = require('request');
-const cheerio = require('cheerio');
-const fs = require('fs');
-const moment = require('moment');
+var request = require('request');
+var cheerio = require('cheerio');
+var fs = require('fs');
+var moment = require('moment');
 
-var links = [];
-var courses_dict = {};
-var all_courses = [];
-var locations = [];
-var load_sum = 0;
-var $;
-var year;
-var semester;
+let links = [];
+let courses_dict = {};
+let all_courses = [];
+let locations = [];
+let load_sum = 0;
+let $;
+let year;
+let semester;
 
-var root = 'https://w5.ab.ust.hk/';
-var days = {
+let root = 'https://w5.ab.ust.hk/';
+let days = {
     Su:{
         id:7,
         text:"Sunday"
@@ -45,7 +45,7 @@ var days = {
     }
 }
 
-var start_end_date = {
+let start_end_date = {
     Fall:{
         start:"01-SEP-",
         end:"30-NOV-"
@@ -85,35 +85,52 @@ function sleep(millis){
     while(curDate-date < millis);
 }
 
-request(root+'wcq/cgi-bin/1730/subject/ACCT', function (error, response, body) {
+function refreshJson(){
+  links = [];
+  courses_dict = {};
+  all_courses = [];
+  locations = [];
+  load_sum = 0;
+  console.log('start crawling');
+  request(root+'wcq/cgi-bin/', async function (error, response, body) {
 
-    $ = cheerio.load(body);
+      $ = cheerio.load(body);
 
-    // console.log(body);
+      // console.log(body);
 
-    var semester_str = GetInnerText($('a[href*="#"]')[0]);
-    [year,semester] = semester_str.split(' ');
-    // console.log(semester_str, year, semester);
-    if(semester.indexOf('Fall') !== -1){
-        year = year.split('-')[0];
-    }
-    else{
-        year = '20'+year.split('-')[1];
-    }
+      var semester_str = GetInnerText($('a[href*="#"]')[0]);
+      [year,semester] = semester_str.split(' ');
+      // console.log(semester_str, year, semester);
+      if(semester.indexOf('Fall') !== -1){
+          year = year.split('-')[0];
+      }
+      else{
+          year = '20'+year.split('-')[1];
+      }
 
-    console.log(year, semester);
-    // console.log(start_end_date,year,semester)
+      console.log(year, semester);
+      // console.log(start_end_date,year,semester)
 
-    GetCourseLinks();
-    console.log(links);
-    // for(var i=0; i<links.length; i++){
-        PushCoursesByURL(links[0],0);
-    // }
+      GetCourseLinks();
+      // console.log(links);
+      for(var i=0; i<links.length; i++){
+          console.log(`retrieving ${i+1}/${links.length}`);
+          await PushCoursesByURL(links[i]);
+          if (i == links.length-1){
+            fs.writeFile("courses.json", JSON.stringify({courses:courses_dict}), function(err) {
+                if(err) {
+                    return console.log(err);
+                    reject();
+                }
+            });
+          }
+      }
 
-    //  PushCoursesByURL('https://w5.ab.ust.hk/wcq/cgi-bin/1710/');
-    // PushCoursesByURL('http://localhost/class/class/w5.ab.ust.hk/wcq/cgi-bin/1640/')
+      //  PushCoursesByURL('https://w5.ab.ust.hk/wcq/cgi-bin/1710/');
+      // PushCoursesByURL('http://localhost/class/class/w5.ab.ust.hk/wcq/cgi-bin/1640/')
 
-});
+  });
+}
 
  function GetCourseLinks(){
     var anchors = $('a.ug');
@@ -124,47 +141,42 @@ request(root+'wcq/cgi-bin/1730/subject/ACCT', function (error, response, body) {
     for (var i=0; i<anchors.length; i++){
         links.push(root+anchors[i].attribs.href.split('https://w5.ab.ust.hk/').join(''));
     }
+    console.log('array length:', links.length);
+    console.log('the array links:', links);
  }
 
-function PushCoursesByURL(url,links_index){
+function PushCoursesByURL(url){
     if(root.indexOf('localhost')!==-1) url+='.html';
-    sleep(300);
-    request(url ,function (error ,response ,body){
+    return new Promise((resolve, reject) => {
+      request(url ,function (error ,response ,body){
 
-        $ = cheerio.load(body);
+          $ = cheerio.load(body);
 
-        console.log(url);
+          console.log(url);
 
-        var raw_courses = $('div.course');
+          var raw_courses = $('div.course');
 
-        //for each course in courses
-        for(var i=0; i<raw_courses.length; i++){
-            var raw_course = $(raw_courses[i]);
-            var sections = raw_course.find('tr').filter('[class!=""]');
+          //for each course in courses
+          for(var i=0; i<raw_courses.length; i++){
+              var raw_course = $(raw_courses[i]);
+              var sections = raw_course.find('tr').filter('[class!=""]');
 
-            var course = BuildHeading(GetInnerText(raw_course.find('h2')[0]));
-            course.details = BuildDetails($(raw_course.find('.courseinfo')[0]).find('tbody'));
-            course.sections= BuildSections(sections);
+              var course = BuildHeading(GetInnerText(raw_course.find('h2')[0]));
+              course.details = BuildDetails($(raw_course.find('.courseinfo')[0]).find('tbody'));
+              course.sections= BuildSections(sections);
 
-            all_courses.push(course);
-            courses_dict[course.id] = course;
+              all_courses.push(course);
+              courses_dict[course.id] = course;
 
-        }
-
-        //loaded all courses
-        if(++load_sum>=links.length){
-            fs.writeFile("../courses_dict.json", JSON.stringify({courses:courses_dict}), function(err) {
-                if(err) {
-                    return console.log(err);
-                }
-                console.log("The file was saved!");
-            });
-            // console.log(all_courses);
-        }
-
-        console.log("Retreived : "+(links_index+1)+"/"+links.length)
-        if(++links_index<links.length) PushCoursesByURL(links[links_index],links_index);
-    })
+          }
+          //loaded all courses
+          if (error) {
+            console.error(error);
+            reject();
+          }
+          resolve();
+      })
+    });
 }
 
 function BuildSections(raw_sections){
@@ -394,3 +406,5 @@ function BuildHeading(h2_str){
         credit:credit
     }
 }
+
+module.exports.refreshJson = refreshJson;

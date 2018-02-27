@@ -3,20 +3,24 @@ require('dotenv').config()
 
 const telegram_bot = require('./src/telegram_bot');
 const fbmessenger = require('./src/fbmessenger');
+const courseCrawler = require('./src/courseJsonGenerator')
 
 const fs = require('fs');
 const express = require('express');
 const moment = require('moment');
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
+const cron = require('node-cron');
 // const dialogflowHandler = require('./src/apiai_handler');
 
 const witHandler = require('./src/witai_handler');
 
-// telegram_bot.bot.on('message', (msg) => {
-//   dialogflowHandler.textRequest(msg.text, msg.chat.id);
-// });
+cron.schedule('*/15 * * * *', function(){
+  courseCrawler.refreshJson();
+  console.log('running the crawler script every 15 min');
+});
 
+// fbmessenger required webhook created with express
 const app = express();
 const PORT = process.env.PORT || 8080;
 
@@ -91,6 +95,14 @@ app.post('/webhook', (req, res) => {
 });
 
 app.listen(PORT, () => console.log(`app listening on port ${PORT}`));
+
+/*
+  telegram related codes
+*/
+
+// telegram_bot.bot.on('message', (msg) => {
+//   dialogflowHandler.textRequest(msg.text, msg.chat.id);
+// });
 
 telegram_bot.bot.on('message', (msg) => {
   witHandler.textRequest(msg.text, msg.chat.id);
